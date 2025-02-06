@@ -1,20 +1,39 @@
-import { render as rtlRender } from '@testing-library/react';
-import { configureStore } from '@reduxjs/toolkit';
+import React from 'react';
+import { render, RenderOptions } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-function render(
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+interface WrapperProps {
+  children: React.ReactNode;
+}
+
+interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  initialState?: any;
+  store?: any;
+}
+
+export function renderWithProviders(
   ui: React.ReactElement,
   {
-    preloadedState = {},
-    store = configureStore({ reducer: {}, preloadedState }),
+    initialState = {},
+    store = configureStore({
+      reducer: {},
+      preloadedState: initialState,
+    }),
     ...renderOptions
-  } = {}
+  }: ExtendedRenderOptions = {}
 ) {
-  const queryClient = new QueryClient();
-
-  function Wrapper({ children }: { children: React.ReactNode }) {
+  function Wrapper({ children }: WrapperProps) {
     return (
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
@@ -24,11 +43,5 @@ function render(
     );
   }
 
-  return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
+  return { store, ...render(ui, { wrapper: Wrapper, ...renderOptions }) };
 }
-
-// re-export everything
-export * from '@testing-library/react';
-
-// override render method
-export { render };

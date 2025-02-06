@@ -1,42 +1,25 @@
-export type FrontendFramework =
-  | 'react'
-  | 'vue'
-  | 'angular'
-  | 'svelte'
-  | 'next'
-  | 'nuxt';
-
-export type BackendFramework =
-  | 'express'
-  | 'nest'
-  | 'django'
-  | 'flask'
-  | 'fastapi'
-  | 'laravel';
+export enum Framework {
+  REACT = 'react',
+  VUE = 'vue',
+  ANGULAR = 'angular',
+  NEXT = 'next',
+  EXPRESS = 'express',
+  NEST = 'nest'
+}
 
 export interface ProjectOptions {
   name: string;
-  framework: FrontendFramework | BackendFramework;
-  type: 'frontend' | 'backend';
+  framework: Framework;
   typescript: boolean;
   testing: boolean;
   linting: boolean;
-  docker: boolean;
-  cicd: boolean;
+  type: 'frontend' | 'backend';
 }
 
 export interface TemplateConfig {
-  name: string;
-  type: 'frontend' | 'backend';
-  framework: FrontendFramework | BackendFramework;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-  scripts: Record<string, string>;
-  files: TemplateFile[];
-  typescript?: boolean;
-}
-
-export interface TemplateFile {
-  path: string;
-  content: string;
+  framework: Framework;
+  typescript: boolean;
+  testing: boolean;
+  linting: boolean;
+  type: string;
 }

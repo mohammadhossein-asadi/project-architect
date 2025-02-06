@@ -1,27 +1,36 @@
-import { Command } from 'commander';
-import { templates } from './templates';
-import { createProject } from './utils/createProject';
+import inquirer from 'inquirer';
+import { createProject } from './utils/createProject.js';
+import { Logger } from './utils/logging/Logger.js';
+import { ProjectOptions } from './types.js';
 
-const program = new Command();
+const logger = new Logger();
 
-program
-  .name('project-architect')
-  .description('CLI to create project templates with best practices')
-  .version('1.0.0');
+export async function cli(): Promise<void> {
+  try {
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'What is your project name?'
+      },
+      {
+        type: 'list',
+        name: 'framework',
+        message: 'Which framework would you like to use?',
+        choices: ['react', 'vue', 'angular', 'next', 'express', 'nest']
+      }
+    ]);
 
-program
-  .command('create')
-  .description('Create a new project')
-  .argument('<name>', 'Project name')
-  .option('-f, --framework <framework>', 'Framework to use')
-  .option('-t, --type <type>', 'Project type (frontend/backend)')
-  .action(async (name, options) => {
-    try {
-      await createProject(name, options);
-    } catch (error) {
-      console.error('Error creating project:', error);
-      process.exit(1);
-    }
-  });
+    const options: ProjectOptions = {
+      ...answers,
+      features: [],
+      dependencies: []
+    };
 
-program.parse();
+    await createProject(options);
+    logger.info('Project created successfully!');
+  } catch (error) {
+    logger.error('Failed to create project:', error);
+    process.exit(1);
+  }
+}

@@ -1,13 +1,14 @@
-import { TemplateConfig } from '../types';
+import { TemplateConfig } from '../types.js';
 
 export interface Plugin {
   name: string;
-  version: string;
   description: string;
-  apply: (template: TemplateConfig) => Promise<TemplateConfig>;
+  apply(config: TemplateConfig): TemplateConfig;
 }
 
 export interface PluginManager {
-  registerPlugin: (plugin: Plugin) => void;
-  applyPlugins: (template: TemplateConfig) => Promise<TemplateConfig>;
+  register(plugin: Plugin): void;
+  apply(config: TemplateConfig, pluginNames: string[]): TemplateConfig;
+  getPlugin(name: string): Plugin | undefined;
+  listPlugins(): Plugin[];
 }

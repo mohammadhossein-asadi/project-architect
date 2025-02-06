@@ -1,63 +1,38 @@
-import { jest } from '@jest/globals';
+import { jest, expect, describe, it, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs-extra';
 import path from 'path';
-import { createProject } from '../../utils/createProject';
+import { createProject } from '../../index';
 import { ProjectOptions } from '../../types';
 
-describe('Project Creation Integration Tests', () => {
-  const testDir = path.join(__dirname, 'test-projects');
+jest.mock('fs-extra');
 
+describe('Project Creation', () => {
+  const mockProjectPath = '/mock/project/path';
+  
   beforeEach(() => {
-    fs.ensureDirSync(testDir);
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    fs.removeSync(testDir);
+    jest.resetAllMocks();
   });
 
-  it('should create a React project with all features', async () => {
+  it('creates a React project with TypeScript', async () => {
     const options: ProjectOptions = {
-      name: 'test-react-app',
-      type: 'frontend',
+      name: 'test-project',
       framework: 'react',
       typescript: true,
       testing: true,
       linting: true,
-      docker: true,
-      cicd: true
+      type: 'frontend'
     };
 
-    const projectPath = path.join(testDir, options.name);
-    await createProject(options, projectPath);
+    await createProject(options);
 
-    // Verify essential files exist
-    expect(fs.existsSync(path.join(projectPath, 'package.json'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'tsconfig.json'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'src/App.tsx'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'Dockerfile'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, '.github/workflows/ci.yml'))).toBeTruthy();
-  });
-
-  it('should create a FastAPI project with all features', async () => {
-    const options: ProjectOptions = {
-      name: 'test-fastapi-app',
-      type: 'backend',
-      framework: 'fastapi',
-      typescript: false,
-      testing: true,
-      linting: true,
-      docker: true,
-      cicd: true
-    };
-
-    const projectPath = path.join(testDir, options.name);
-    await createProject(options, projectPath);
-
-    // Verify essential files exist
-    expect(fs.existsSync(path.join(projectPath, 'requirements.txt'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'app/main.py'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'tests/conftest.py'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, 'Dockerfile'))).toBeTruthy();
-    expect(fs.existsSync(path.join(projectPath, '.github/workflows/ci.yml'))).toBeTruthy();
+    expect(fs.existsSync(path.join(mockProjectPath, 'package.json'))).toBe(true);
+    expect(fs.existsSync(path.join(mockProjectPath, 'tsconfig.json'))).toBe(true);
+    expect(fs.existsSync(path.join(mockProjectPath, 'src/App.tsx'))).toBe(true);
+    expect(fs.existsSync(path.join(mockProjectPath, 'Dockerfile'))).toBe(true);
+    expect(fs.existsSync(path.join(mockProjectPath, '.github/workflows/ci.yml'))).toBe(true);
   });
 });

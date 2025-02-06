@@ -3,77 +3,45 @@ import { OpenAPIV3 } from 'openapi-types';
 export const apiSpec: OpenAPIV3.Document = {
   openapi: '3.0.0',
   info: {
-    title: 'Project API',
+    title: 'Project Architect API',
     version: '1.0.0',
-    description: 'API documentation for the project',
+    description: 'API documentation for Project Architect'
   },
-  servers: [
-    {
-      url: process.env.API_URL || 'http://localhost:3000',
-      description: 'API server',
-    },
-  ],
   paths: {
-    '/api/auth/login': {
+    '/api/projects': {
       post: {
-        tags: ['Authentication'],
-        summary: 'Login user',
+        summary: 'Create a new project',
         requestBody: {
-          required: true,
           content: {
             'application/json': {
               schema: {
-                type: 'object',
-                required: ['email', 'password'],
-                properties: {
-                  email: {
-                    type: 'string',
-                    format: 'email',
-                  },
-                  password: {
-                    type: 'string',
-                    format: 'password',
-                  },
-                },
-              },
-            },
-          },
+                $ref: '#/components/schemas/ProjectOptions'
+              }
+            }
+          }
         },
         responses: {
-          '200': {
-            description: 'Successful login',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    token: {
-                      type: 'string',
-                    },
-                    user: {
-                      type: 'object',
-                      properties: {
-                        id: {
-                          type: 'string',
-                        },
-                        email: {
-                          type: 'string',
-                        },
-                        name: {
-                          type: 'string',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Invalid credentials',
-          },
-        },
-      },
-    },
+          200: {
+            description: 'Project created successfully'
+          }
+        }
+      }
+    }
   },
+  components: {
+    schemas: {
+      ProjectOptions: {
+        type: 'object',
+        required: ['name', 'framework', 'type'],
+        properties: {
+          name: { type: 'string' },
+          framework: { type: 'string' },
+          type: { type: 'string' },
+          typescript: { type: 'boolean' },
+          testing: { type: 'boolean' },
+          linting: { type: 'boolean' }
+        }
+      }
+    }
+  }
 };

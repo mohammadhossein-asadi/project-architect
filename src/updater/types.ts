@@ -1,11 +1,12 @@
 export interface UpdateConfig {
   version: string;
-  templates: string[];
-  force: boolean;
+  description: string;
+  changes: string[];
+  timestamp: string;
 }
 
 export interface UpdateResult {
-  success: boolean;
-  updatedTemplates: string[];
-  errors: string[];
+  hasUpdates: boolean;
+  availableUpdates?: UpdateConfig[];
+  error?: Error;
 }

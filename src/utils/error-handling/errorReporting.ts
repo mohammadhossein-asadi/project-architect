@@ -1,37 +1,48 @@
 import { ErrorInfo } from 'react';
+import { Logger } from '../logging/Logger.js';
+
+const logger = new Logger();
 
 interface ErrorPayload {
-  message: string;
-  stack?: string;
+  error: Error;
   componentStack?: string;
-  metadata?: Record<string, unknown>;
   timestamp: string;
+  user?: string;
   environment: string;
 }
 
-export async function captureError(error: Error, errorInfo?: ErrorInfo): Promise<void> {
+export function reportError(error: Error, errorInfo?: ErrorInfo): void {
   const payload: ErrorPayload = {
-    message: error.message,
-    stack: error.stack,
-    componentStack: errorInfo?.componentStack,
-    metadata: {
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      // Add any other relevant metadata
-    },
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
+    error,
+    componentStack: errorInfo?.componentStack || undefined,
+    timestamp: new Date('2025-02-06T23:05:51Z').toISOString(),
+    user: 'mohammadhossein-asadi',
+    environment: process.env.NODE_ENV || 'development'
   };
 
+  logger.error('Error reported:', payload);
+
+  // Send to error tracking service
+  sendToErrorTrackingService(payload).catch(err => {
+    logger.error('Failed to send error to tracking service:', err);
+  });
+}
+
+async function sendToErrorTrackingService(payload: ErrorPayload): Promise<void> {
   try {
-    await fetch('/api/error-reporting', {
+    const response = await fetch('/api/errors', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
-  } catch (reportingError) {
-    console.error('Failed to report error:', reportingError);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    logger.error('Error sending to tracking service:', error);
+    throw error;
   }
 }

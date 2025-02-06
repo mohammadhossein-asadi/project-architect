@@ -1,30 +1,18 @@
-export type FrontendFramework =
-  | 'react'
-  | 'vue'
-  | 'angular'
-  | 'svelte'
-  | 'next'
-  | 'nuxt';
-
-export type BackendFramework =
-  | 'express'
-  | 'nest'
-  | 'django'
-  | 'flask'
-  | 'fastapi'
-  | 'laravel';
-
 export interface TemplateConfig {
   name: string;
-  type: 'frontend' | 'backend';
-  framework: FrontendFramework | BackendFramework;
+  version: string;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
   scripts: Record<string, string>;
-  files: TemplateFile[];
+  created?: string;
+  author?: string;
 }
 
-export interface TemplateFile {
-  path: string;
-  content: string;
+export enum Framework {
+  REACT = 'react',
+  VUE = 'vue',
+  ANGULAR = 'angular',
+  NEXT = 'next',
+  EXPRESS = 'express',
+  NEST = 'nest'
 }

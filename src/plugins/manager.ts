@@ -1,28 +1,49 @@
-import { Plugin, PluginManager } from './types';
-import { TemplateConfig } from '../types';
-import logger from '../utils/logger';
+import { Plugin, PluginManager } from './types.js';
+import { TemplateConfig } from '../types.js';
+import logger from '../utils/logger.js';
 
-export class DefaultPluginManager implements PluginManager {
-  private plugins: Plugin[] = [];
+export class PluginManagerImpl implements PluginManager {
+  private plugins: Map<string, Plugin>;
 
-  registerPlugin(plugin: Plugin): void {
-    logger.info(`Registering plugin: ${plugin.name}`);
-    this.plugins.push(plugin);
+  constructor() {
+    this.plugins = new Map();
   }
 
-  async applyPlugins(template: TemplateConfig): Promise<TemplateConfig> {
-    let result = { ...template };
+  register(plugin: Plugin): void {
+    if (this.plugins.has(plugin.name)) {
+      logger.warn(`Plugin ${plugin.name} is already registered. Overwriting...`);
+    }
+    this.plugins.set(plugin.name, plugin);
+    logger.info(`Plugin ${plugin.name} registered successfully`);
+  }
 
-    for (const plugin of this.plugins) {
+  apply(config: TemplateConfig, pluginNames: string[]): TemplateConfig {
+    let resultConfig = { ...config };
+    
+    for (const name of pluginNames) {
+      const plugin = this.plugins.get(name);
+      if (!plugin) {
+        logger.warn(`Plugin ${name} not found, skipping...`);
+        continue;
+      }
+      
       try {
-        logger.info(`Applying plugin: ${plugin.name}`);
-        result = await plugin.apply(result);
+        resultConfig = plugin.apply(resultConfig);
+        logger.info(`Applied plugin ${name} successfully`);
       } catch (error) {
-        logger.error(`Error applying plugin ${plugin.name}:`, error);
+        logger.error(`Failed to apply plugin ${name}:`, error);
         throw error;
       }
     }
+    
+    return resultConfig;
+  }
 
-    return result;
+  getPlugin(name: string): Plugin | undefined {
+    return this.plugins.get(name);
+  }
+
+  listPlugins(): Plugin[] {
+    return Array.from(this.plugins.values());
   }
 }

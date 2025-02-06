@@ -1,71 +1,47 @@
-import { LogLevel, LogEntry, LogMetadata } from './types';
-import { LoggerConfig } from './config';
-import { formatLogEntry } from './formatters';
-import { LogTransport } from './transports/LogTransport';
-import { ConsoleTransport } from './transports/ConsoleTransport';
-import { HttpTransport } from './transports/HttpTransport';
+import { LogMetadata } from '../../types';
+import { LoggerConfigManager } from './LoggerConfigManager';
 
 export class Logger {
-  private transports: LogTransport[] = [];
-  private context: string;
+  private config: LoggerConfigManager;
 
-  constructor(context: string) {
-    this.context = context;
-    this.configure(LoggerConfig.getDefaultConfig());
+  constructor(private context: string = 'default') {
+    this.config = new LoggerConfigManager();
   }
 
-  public configure(config: LoggerConfig): void {
-    this.transports = [
-      new ConsoleTransport(config.console),
-      new HttpTransport(config.http),
-    ];
+  info(message: string, metadata?: Partial<LogMetadata>) {
+    this.log('info', message, metadata);
   }
 
-  public info(message: string, metadata?: LogMetadata): void {
-    this.log(LogLevel.INFO, message, metadata);
+  error(message: string, error?: Error | unknown, metadata?: Partial<LogMetadata>) {
+    const errorMetadata = {
+      ...(metadata || {}),
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: '2025-02-06 23:33:33',
+      user: 'mohammadhossein-asadi',
+      level: 'error',
+      context: this.context
+    };
+    this.log('error', message, errorMetadata);
   }
 
-  public warn(message: string, metadata?: LogMetadata): void {
-    this.log(LogLevel.WARN, message, metadata);
+  warn(message: string, metadata?: Partial<LogMetadata>) {
+    this.log('warn', message, metadata);
   }
 
-  public error(message: string, metadata?: LogMetadata): void {
-    this.log(LogLevel.ERROR, message, metadata);
+  debug(message: string, metadata?: Partial<LogMetadata>) {
+    this.log('debug', message, metadata);
   }
 
-  public debug(message: string, metadata?: LogMetadata): void {
-    this.log(LogLevel.DEBUG, message, metadata);
-  }
-
-  private log(level: LogLevel, message: string, metadata?: LogMetadata): void {
-    const entry: LogEntry = {
-      timestamp: new Date().toISOString(),
+  private log(level: string, message: string, metadata?: Partial<LogMetadata>) {
+    const logEntry: LogMetadata = {
+      timestamp: '2025-02-06 23:33:33',
       level,
-      context: this.context,
       message,
-      metadata: {
-        ...metadata,
-        sessionId: this.getSessionId(),
-        userId: this.getUserId(),
-      },
+      context: this.context,
+      user: 'mohammadhossein-asadi',
+      ...metadata
     };
 
-    const formattedEntry = formatLogEntry(entry);
-
-    this.transports.forEach(transport => {
-      transport.send(formattedEntry).catch(error => {
-        console.error('Failed to send log entry:', error);
-      });
-    });
-  }
-
-  private getSessionId(): string {
-    // Implement session ID logic
-    return 'session-id';
-  }
-
-  private getUserId(): string {
-    // Implement user ID logic
-    return 'user-id';
+    console.log(JSON.stringify(logEntry));
   }
 }
