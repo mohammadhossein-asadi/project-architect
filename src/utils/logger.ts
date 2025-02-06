@@ -1,31 +1,27 @@
-import chalk from 'chalk';
+import winston from 'winston';
 
-export class Logger {
-  static info(message: string): void {
-    console.log(chalk.blue('info'), message);
-  }
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'project-architect' },
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
 
-  static success(message: string): void {
-    console.log(chalk.green('success'), message);
-  }
-
-  static warning(message: string): void {
-    console.log(chalk.yellow('warning'), message);
-  }
-
-  static error(message: string): void {
-    console.log(chalk.red('error'), message);
-  }
-
-  static newLine(): void {
-    console.log();
-  }
-
-  static welcomeMessage(): void {
-    console.log(chalk.cyan(`
-    ╔═══════════════════════════════════════╗
-    ║         Project Architect CLI         ║
-    ╚═══════════════════════════════════════╝
-    `));
-  }
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    )
+  }));
 }
+
+export default logger;

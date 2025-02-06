@@ -14,17 +14,6 @@ export type BackendFramework =
   | 'fastapi'
   | 'laravel';
 
-export interface ProjectOptions {
-  name: string;
-  framework: FrontendFramework | BackendFramework;
-  type: 'frontend' | 'backend';
-  typescript: boolean;
-  testing: boolean;
-  linting: boolean;
-  docker: boolean;
-  cicd: boolean;
-}
-
 export interface TemplateConfig {
   name: string;
   type: 'frontend' | 'backend';
@@ -33,7 +22,6 @@ export interface TemplateConfig {
   devDependencies: Record<string, string>;
   scripts: Record<string, string>;
   files: TemplateFile[];
-  typescript?: boolean;
 }
 
 export interface TemplateFile {
